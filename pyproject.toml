@@ -157,7 +157,7 @@ exclude = [
 ]
 
 [tool.setuptools.package-data]
-lmms_eval = ["tasks/**/*.yaml", "tasks/**/*.yml", "tasks/**/*_yaml"]
+lmms_eval = ["tasks/**/*.yaml", "tasks/**/*.yml", "tasks/**/*_yaml", "tasks/**/*_yaml_*"]
 
 [project.scripts]
 lmms-eval = "lmms_eval.__main__:cli_evaluate"
