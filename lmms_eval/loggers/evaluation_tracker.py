@@ -208,8 +208,27 @@ class EvaluationTracker:
                 path = path.joinpath(self.general_config_tracker.model_name_sanitized)
                 path.mkdir(parents=True, exist_ok=True)
 
-                self.date_id = datetime_str.replace(":", "-")
-                file_results_aggregated = path.joinpath(f"{self.date_id}_results.json")
+                # Use ISO format timestamp like lm-evaluation-harness: YYYY-MM-DDTHH-MM-SS.microseconds
+                # Convert datetime_str to ISO format if needed, or generate new timestamp
+                if datetime_str:
+                    # Try to parse the datetime_str and convert to ISO format
+                    try:
+                        # If datetime_str is in format YYYYMMDD_HHMMSS, convert it
+                        if "_" in datetime_str and len(datetime_str) == 15:
+                            dt = datetime.strptime(datetime_str, "%Y%m%d_%H%M%S")
+                            self.date_id = dt.isoformat().replace(":", "-")
+                        else:
+                            # Already in ISO format or other format, use as-is but replace colons
+                            self.date_id = datetime_str.replace(":", "-")
+                    except (ValueError, AttributeError):
+                        # Fallback: generate new timestamp in ISO format
+                        self.date_id = datetime.now().isoformat().replace(":", "-")
+                else:
+                    # Generate new timestamp in ISO format like lm-evaluation-harness
+                    self.date_id = datetime.now().isoformat().replace(":", "-")
+                
+                # Use results_{timestamp}.json format to match lm-evaluation-harness
+                file_results_aggregated = path.joinpath(f"results_{self.date_id}.json")
                 file_results_aggregated.open("w", encoding="utf-8").write(dumped)
 
                 if self.api and self.push_results_to_hub:
@@ -222,10 +241,10 @@ class EvaluationTracker:
                     )
                     self.api.upload_file(
                         repo_id=repo_id,
-                        path_or_fileobj=str(path.joinpath(f"{self.date_id}_results.json")),
+                        path_or_fileobj=str(path.joinpath(f"results_{self.date_id}.json")),
                         path_in_repo=os.path.join(
                             self.general_config_tracker.model_name,
-                            f"{self.date_id}_results.json",
+                            f"results_{self.date_id}.json",
                         ),
                         repo_type="dataset",
                         commit_message=f"Adding aggregated results for {self.general_config_tracker.model_name}",
@@ -256,7 +275,8 @@ class EvaluationTracker:
                 path = path.joinpath(self.general_config_tracker.model_name_sanitized)
                 path.mkdir(parents=True, exist_ok=True)
 
-                file_results_samples = path.joinpath(f"{self.date_id}_samples_{task_name}.jsonl")
+                # Use samples_{task_name}_{timestamp}.jsonl format to match lm-evaluation-harness
+                file_results_samples = path.joinpath(f"samples_{task_name}_{self.date_id}.jsonl")
 
                 for sample in samples:
                     # we first need to sanitize arguments and resps
