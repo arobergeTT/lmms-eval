@@ -116,6 +116,9 @@ mmsearch = [
     "rouge",
 ]
 
+[tool.setuptools]
+include-package-data = true
+
 [tool.setuptools.packages.find]
 include = ["lmms_eval*"]
 exclude = [
@@ -152,6 +155,9 @@ exclude = [
     "notebooks*",
     "logs*",
 ]
+
+[tool.setuptools.package-data]
+lmms_eval = ["tasks/**/*.yaml", "tasks/**/*.yml"]
 
 [project.scripts]
 lmms-eval = "lmms_eval.__main__:cli_evaluate"
