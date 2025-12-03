@@ -262,15 +262,34 @@ class EvaluationTracker:
                     # we first need to sanitize arguments and resps
                     # otherwise we won't be able to load the dataset
                     # using the datasets library
-                    # arguments = {}
-                    sample["input"] = sample["arguments"][0]
-                    sample["resps"] = sanitize_list(sample["resps"])
-                    sample["filtered_resps"] = sanitize_list(sample["filtered_resps"])
-                    if sample["filtered_resps"] == sample["resps"][0] or sample["filtered_resps"] == sample["resps"]:
-                        sample.pop("resps")
-                    sample["target"] = str(sample["target"])
-                    sample.pop("arguments")
-                    sample.pop("doc")
+                    # Extract input from arguments for backward compatibility
+                    if "arguments" in sample and len(sample["arguments"]) > 0:
+                        sample["input"] = sample["arguments"][0]
+                    # Sanitize resps and filtered_resps
+                    if "resps" in sample:
+                        sample["resps"] = sanitize_list(sample["resps"])
+                    if "filtered_resps" in sample:
+                        sample["filtered_resps"] = sanitize_list(sample["filtered_resps"])
+                    # Keep resps even if they match filtered_resps to preserve full model output
+                    # Only remove resps if they are exactly the same as filtered_resps AND filtered_resps is a single string
+                    # (to avoid removing when resps contains multiple responses)
+                    if "resps" in sample and "filtered_resps" in sample:
+                        # Check if resps is a list with one element that matches filtered_resps
+                        if isinstance(sample["resps"], list) and len(sample["resps"]) == 1:
+                            if sample["filtered_resps"] == sample["resps"][0]:
+                                # Only remove if they're truly identical (already filtered)
+                                # But keep them for debugging purposes - comment out the removal
+                                pass  # Keep resps for full traceability
+                        elif sample["filtered_resps"] == sample["resps"]:
+                            # If they're exactly the same, still keep resps for consistency
+                            pass  # Keep resps for full traceability
+                    # Convert target to string
+                    if "target" in sample:
+                        sample["target"] = str(sample["target"])
+                    # Keep arguments and doc for full traceability and debugging
+                    # They provide important context about the evaluation and match the format
+                    # of lm-evaluation-harness samples files (e.g., mbpp_instruct)
+                    # Note: arguments and doc are preserved to enable full analysis of the evaluation
 
                     sample_dump = (
                         json.dumps(
