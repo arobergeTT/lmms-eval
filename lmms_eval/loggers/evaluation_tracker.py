@@ -219,7 +219,7 @@ class EvaluationTracker:
                             self.date_id = dt.isoformat().replace(":", "-")
                         else:
                             # Already in ISO format or other format, use as-is but replace colons
-                            self.date_id = datetime_str.replace(":", "-")
+                self.date_id = datetime_str.replace(":", "-")
                     except (ValueError, AttributeError):
                         # Fallback: generate new timestamp in ISO format
                         self.date_id = datetime.now().isoformat().replace(":", "-")
@@ -284,12 +284,12 @@ class EvaluationTracker:
                     # using the datasets library
                     # Extract input from arguments for backward compatibility
                     if "arguments" in sample and len(sample["arguments"]) > 0:
-                        sample["input"] = sample["arguments"][0]
+                    sample["input"] = sample["arguments"][0]
                     # Sanitize resps and filtered_resps
                     if "resps" in sample:
-                        sample["resps"] = sanitize_list(sample["resps"])
+                    sample["resps"] = sanitize_list(sample["resps"])
                     if "filtered_resps" in sample:
-                        sample["filtered_resps"] = sanitize_list(sample["filtered_resps"])
+                    sample["filtered_resps"] = sanitize_list(sample["filtered_resps"])
                     # Keep resps even if they match filtered_resps to preserve full model output
                     # Only remove resps if they are exactly the same as filtered_resps AND filtered_resps is a single string
                     # (to avoid removing when resps contains multiple responses)
@@ -305,7 +305,7 @@ class EvaluationTracker:
                             pass  # Keep resps for full traceability
                     # Convert target to string
                     if "target" in sample:
-                        sample["target"] = str(sample["target"])
+                    sample["target"] = str(sample["target"])
                     # Keep arguments and doc for full traceability and debugging
                     # They provide important context about the evaluation and match the format
                     # of lm-evaluation-harness samples files (e.g., mbpp_instruct)
